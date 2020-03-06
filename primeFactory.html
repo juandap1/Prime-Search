@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Find Prime Numbers</title>
+<script src="https://kit.fontawesome.com/1b6b11ea85.js" crossorigin="anonymous"></script>
+<style>
+body {
+	background-color: black;
+}
+.button1{
+	display:inline-block;
+	padding:0.35em 1.2em;
+	border:0.1em solid #FFFFFF;
+	margin:0 0.3em 0.3em 0;
+	border-radius:0.12em;
+	box-sizing: border-box;
+	text-decoration:none;
+	font-family:'Roboto',sans-serif;
+	font-weight:300;
+	color:#FFFFFF;
+	text-align:center;
+	transition: all 0.2s;
+	background-color: gray;
+	width: 100%;
+	cursor: pointer;
+}
+.button1:hover{
+	color:#000000;
+	background-color:#FFFFFF;
+}
+@media all and (max-width:30em){
+.button1{
+	display:block;
+	margin:0.4em auto;
+}
+}
+#status {
+	position: fixed;
+	top: 80px;
+	left: 5%;
+	width: 90%;
+	height: 80%;
+	border: solid 2px gray;
+	color: #00FF41;
+	font-size: 45px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+#lastChecked {
+	top: 40%;
+	position: relative;
+}
+
+#gear1, #gear2, #gear3 {
+    color: #888;
+    display: block;
+    float: left;
+    position: absolute;
+}
+            
+#gear1 {
+    top: 42%;
+	left: 41%;
+}
+            
+#gear2 {
+	top: 33%;
+	left: 45%;
+}
+
+#gear3 {
+    top: 42%;
+    left: 49%;
+}
+
+.spin {
+    -webkit-animation:spin 4s linear infinite;
+    -moz-animation:spin 4s linear infinite;
+    animation:spin 4s linear infinite;
+}
+
+.spin-back {
+    -webkit-animation:spin-back 4s linear infinite;
+    -moz-animation:spin-back 4s linear infinite;
+    animation:spin-back 4s linear infinite;
+}
+
+@-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
+@-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+@keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
+
+@-moz-keyframes spin-back { 100% { -moz-transform: rotate(-360deg); } }
+@-webkit-keyframes spin-back { 100% { -webkit-transform: rotate(-360deg); } }
+@keyframes spin-back { 100% { -webkit-transform: rotate(-360deg); transform:rotate(-360deg); } }
+</style>
+</head>
+<body>
+<button id="primeBtn" class="button1" onclick="getLast()">Find Next Prime</button>
+<button id="killBtn" class="button1" onclick="test()">Kill Switch</button>
+<div id="status">
+<p id="lastChecked">Idle</p>
+</div>
+<script>
+var startTime, endTime;
+var check = 0;
+function getLast() {
+document.getElementById("status").innerHTML = '<div id="gearDiv"><i id="gear1" class="fa fa-2x fa-gear spin"></i><i id="gear2" class="fa fa-2x fa-gear spin-back"></i><i id="gear3" class="fa fa-2x fa-gear spin"></i></div>';
+xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			var last = this.responseText;
+			primeFactory(last);
+		}
+	};
+xhttp.open("GET", "getLastPrime.php", true);
+xhttp.send();
+}
+
+function killSwitch() {
+	check++;
+	document.getElementById("lastChecked").innerHTML = "Last Number Checked: " + last + "\n Elapsed Time: " + elapsed + " seconds";
+}
+
+function primeFactory(last) {
+	check = 0;
+	start();
+	while (check == 0) {
+		last++;
+		var result = isPrime(last);
+		if (result == true) {
+			var elapsed = end();
+			document.getElementById("status").innerHTML = '<p id="lastChecked">Prime Number ' + last + " found in " + elapsed + ' seconds!</p>';
+			updateLastPrime(elapsed, last);
+			check = 1;
+		} else {
+			updateLastChecked(last);
+		}
+	}
+}
+
+function killSwitch() {
+	check++;
+}
+
+function updateLastPrime(time, last) {
+	xhttp = new XMLHttpRequest();
+	xhttp.open("GET", "updatePrime.php?u=" + last + "&t=" + time, true);
+	xhttp.send();
+}
+
+function updateLastChecked(current) {
+	xhttp = new XMLHttpRequest();
+	xhttp.open("GET", "updateLastChecked.php?u=" + current, true);
+	xhttp.send();
+}
+
+function isPrime(value) {
+    for(var i = 2; i < value; i++) {
+        if(value % i === 0) {
+            return false;
+        }
+    }
+    return value > 1;
+}
+
+function start() {
+  startTime = new Date();
+};
+
+function end() {
+  endTime = new Date();
+  var timeDiff = endTime - startTime; //in ms
+  // strip the ms
+  timeDiff /= 1000;
+
+  // get seconds 
+  //var seconds = Math.round(timeDiff);
+  return timeDiff;
+}
+</script>
+</body>
+</html>
